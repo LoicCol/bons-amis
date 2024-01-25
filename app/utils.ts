@@ -1,7 +1,12 @@
+import { Group } from "@prisma/client";
 import { useMatches } from "@remix-run/react";
 import { useMemo } from "react";
 
 import type { User } from "~/models/user.server";
+
+type UserWithGroups = User & {
+  groups: Group[];
+};
 
 /**
  * This base hook is used in other hooks to quickly search for specific data
@@ -20,11 +25,11 @@ export function useMatchesData(
   return route?.data;
 }
 
-function isUser(user: any): user is User {
+function isUser(user: any): user is UserWithGroups {
   return user && typeof user === "object" && typeof user.email === "string";
 }
 
-export function useOptionalUser(): User | undefined {
+export function useOptionalUser(): UserWithGroups | undefined {
   const data = useMatchesData("root");
   if (!data || !isUser(data.user)) {
     return undefined;
@@ -32,7 +37,7 @@ export function useOptionalUser(): User | undefined {
   return data.user;
 }
 
-export function useUser(): User {
+export function useUser(): UserWithGroups {
   const maybeUser = useOptionalUser();
   if (!maybeUser) {
     throw new Error(
